@@ -3,36 +3,50 @@ import { Link, useNavigate } from 'react-router-dom';
 import axios from 'axios';
 
 const Register = () => {
-  const [firstname, setFirstName] = useState('');
-  const [lastname, setLastName] = useState('');
-  const [address, setAddress] = useState('');
-  const [creditcard, setCreditCardInfo] = useState('');
-  const [phonenumber, setPhoneNumber] = useState('');
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
+  const [formData, setFormData] = useState({
+    firstname: '',
+    lastname: '',
+    address: '',
+    creditcard: '',
+    phonenumber: '',
+    email: '',
+    password: '',
+  });
   const [error, setError] = useState('');
   const navigate = useNavigate();
+
+  const handleChange = (e) => {
+    setFormData({ ...formData, [e.target.name]: e.target.value });
+  };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError('');
 
+    console.log('Submitting form data:', formData); // Debugging
+
+
     try {
-      const res = await axios.post('http://localhost:5000/register', {
-        firstname,
-        lastname,
-        address,
-        creditcard,
-        phonenumber,
-        email,
-        password,
-      });
+      const res = await axios.post('http://localhost:5000/register', formData);
       if (res.status === 201) {
+        console.log('Registration successful:', res.data.message);
         navigate('/login');
       }
     } catch (err) {
-      setError('Registration failed. Please try again.');
+      console.error('Registration error:', err.response?.data || err.message);
+      setError(err.response?.data?.message || 'Registration failed. Please try again.');
     }
+  };
+
+  const menuLinkStyle = {
+    textDecoration: 'none',
+    fontSize: '1.2rem',
+    color: '#007bff',
+    padding: '10px 20px',
+    backgroundColor: '#f5f5f5',
+    borderRadius: '4px',
+    display: 'inline-block',
+    transition: 'background-color 0.3s',
   };
 
   return (
@@ -43,9 +57,7 @@ const Register = () => {
       <nav style={{ textAlign: 'center', marginBottom: '20px' }}>
         <ul style={{ listStyleType: 'none', padding: '0', display: 'flex', justifyContent: 'center', gap: '20px' }}>
           <li><Link to="/" style={menuLinkStyle}>Home</Link></li>
-          <li><Link to="/dashboard" style={menuLinkStyle}>Dashboard</Link></li>
           <li><Link to="/login" style={menuLinkStyle}>Login</Link></li>
-          <li><Link to="/profile" style={menuLinkStyle}>Profile</Link></li>
         </ul>
       </nav>
 
@@ -55,86 +67,141 @@ const Register = () => {
           <label>First Name:</label>
           <input
             type="text"
-            value={firstname}
-            onChange={(e) => setFirstName(e.target.value)}
+            name="firstname"
+            value={formData.firstname}
+            onChange={handleChange}
             required
+            style={{
+              display: 'block',
+              width: '100%',
+              padding: '10px',
+              marginBottom: '10px',
+              border: '1px solid #ddd',
+              borderRadius: '4px',
+            }}
           />
         </div>
         <div className="form-group">
           <label>Last Name:</label>
           <input
             type="text"
-            value={lastname}
-            onChange={(e) => setLastName(e.target.value)}
+            name="lastname"
+            value={formData.lastname}
+            onChange={handleChange}
             required
+            style={{
+              display: 'block',
+              width: '100%',
+              padding: '10px',
+              marginBottom: '10px',
+              border: '1px solid #ddd',
+              borderRadius: '4px',
+            }}
           />
         </div>
         <div className="form-group">
           <label>Address:</label>
           <input
             type="text"
-            value={address}
-            onChange={(e) => setAddress(e.target.value)}
+            name="address"
+            value={formData.address}
+            onChange={handleChange}
             required
+            style={{
+              display: 'block',
+              width: '100%',
+              padding: '10px',
+              marginBottom: '10px',
+              border: '1px solid #ddd',
+              borderRadius: '4px',
+            }}
           />
         </div>
         <div className="form-group">
           <label>Credit Card Info:</label>
           <input
             type="text"
-            value={creditcard}
-            onChange={(e) => setCreditCardInfo(e.target.value)}
+            name="creditcard"
+            value={formData.creditcard}
+            onChange={handleChange}
             required
+            style={{
+              display: 'block',
+              width: '100%',
+              padding: '10px',
+              marginBottom: '10px',
+              border: '1px solid #ddd',
+              borderRadius: '4px',
+            }}
           />
         </div>
         <div className="form-group">
           <label>Phone Number:</label>
           <input
             type="text"
-            value={phonenumber}
-            onChange={(e) => setPhoneNumber(e.target.value)}
+            name="phonenumber"
+            value={formData.phonenumber}
+            onChange={handleChange}
             required
+            style={{
+              display: 'block',
+              width: '100%',
+              padding: '10px',
+              marginBottom: '10px',
+              border: '1px solid #ddd',
+              borderRadius: '4px',
+            }}
           />
         </div>
         <div className="form-group">
           <label>Email:</label>
           <input
             type="email"
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
+            name="email"
+            value={formData.email}
+            onChange={handleChange}
             required
+            style={{
+              display: 'block',
+              width: '100%',
+              padding: '10px',
+              marginBottom: '10px',
+              border: '1px solid #ddd',
+              borderRadius: '4px',
+            }}
           />
         </div>
         <div className="form-group">
           <label>Password:</label>
           <input
             type="password"
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
+            name="password"
+            value={formData.password}
+            onChange={handleChange}
             required
+            style={{
+              display: 'block',
+              width: '100%',
+              padding: '10px',
+              marginBottom: '10px',
+              border: '1px solid #ddd',
+              borderRadius: '4px',
+            }}
           />
         </div>
-        <button type="submit">Register</button>
+        <button type="submit" style={{
+          fontSize: '1.2rem',
+          color: '#fff',
+          backgroundColor: '#007bff',
+          padding: '10px 20px',
+          borderRadius: '4px',
+          border: 'none',
+          cursor: 'pointer',
+          width: 'auto',
+        }}>Register</button>
       </form>
     </div>
   );
-};
-
-// Define the common styles for the menu links
-const menuLinkStyle = {
-  textDecoration: 'none',
-  fontSize: '1.2rem',
-  color: '#007bff',
-  padding: '10px 20px',
-  backgroundColor: '#f5f5f5',
-  borderRadius: '4px',
-  display: 'inline-block',
-  transition: 'background-color 0.3s',
-};
-
-// Add a hover effect for the links
-menuLinkStyle[':hover'] = {
-  backgroundColor: '#e0e0e0',
 };
 
 export default Register;
