@@ -14,9 +14,9 @@ phonenumber VARCHAR(15),
 
 email VARCHAR(100) UNIQUE, 
 
-password VARCHAR(255) 
+password VARCHAR(255),
 
-role VARCHAR(10) DEFAULT 'client';
+role VARCHAR(10) DEFAULT 'client'
 
 ); 
 
