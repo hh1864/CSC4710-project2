@@ -3,11 +3,11 @@ import { Link, useNavigate } from 'react-router-dom';
 import axios from 'axios';
 
 const Register = () => {
-  const [firstName, setFirstName] = useState('');
-  const [lastName, setLastName] = useState('');
+  const [firstname, setFirstName] = useState('');
+  const [lastname, setLastName] = useState('');
   const [address, setAddress] = useState('');
-  const [creditCardInfo, setCreditCardInfo] = useState('');
-  const [phoneNumber, setPhoneNumber] = useState('');
+  const [creditcard, setCreditCardInfo] = useState('');
+  const [phonenumber, setPhoneNumber] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
@@ -19,11 +19,11 @@ const Register = () => {
 
     try {
       const res = await axios.post('http://localhost:5000/register', {
-        firstName,
-        lastName,
+        firstname,
+        lastname,
         address,
-        creditCardInfo,
-        phoneNumber,
+        creditcard,
+        phonenumber,
         email,
         password,
       });
@@ -55,7 +55,7 @@ const Register = () => {
           <label>First Name:</label>
           <input
             type="text"
-            value={firstName}
+            value={firstname}
             onChange={(e) => setFirstName(e.target.value)}
             required
           />
@@ -64,7 +64,7 @@ const Register = () => {
           <label>Last Name:</label>
           <input
             type="text"
-            value={lastName}
+            value={lastname}
             onChange={(e) => setLastName(e.target.value)}
             required
           />
@@ -82,7 +82,7 @@ const Register = () => {
           <label>Credit Card Info:</label>
           <input
             type="text"
-            value={creditCardInfo}
+            value={creditcard}
             onChange={(e) => setCreditCardInfo(e.target.value)}
             required
           />
@@ -91,7 +91,7 @@ const Register = () => {
           <label>Phone Number:</label>
           <input
             type="text"
-            value={phoneNumber}
+            value={phonenumber}
             onChange={(e) => setPhoneNumber(e.target.value)}
             required
           />

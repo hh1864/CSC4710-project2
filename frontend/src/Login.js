@@ -3,7 +3,7 @@ import axios from 'axios';
 import { Link, useNavigate } from 'react-router-dom';
 
 const Login = () => {
-  const [username, setUsername] = useState('');
+  const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
   const navigate = useNavigate();
@@ -13,7 +13,7 @@ const Login = () => {
     setError('');
 
     try {
-      const res = await axios.post('http://localhost:5000/login', { username, password });
+      const res = await axios.post('http://localhost:5000/login', { email, password });
       localStorage.setItem('token', res.data.token); // Save JWT token in localStorage
       navigate('/dashboard'); // Redirect to dashboard after successful login
     } catch (err) {
@@ -38,11 +38,11 @@ const Login = () => {
       {error && <p className="error" style={{ color: 'red' }}>{error}</p>}
       <form onSubmit={handleSubmit}>
         <div className="form-group">
-          <label>Username:</label>
+          <label>Email:</label>
           <input
             type="text"
-            value={username}
-            onChange={(e) => setUsername(e.target.value)}
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
             required
           />
         </div>
@@ -62,7 +62,7 @@ const Login = () => {
       <div style={{ marginTop: '20px', padding: '10px', backgroundColor: '#f5f5f5', borderRadius: '8px' }}>
         <h3 style={{ fontSize: '1.5rem', color: '#007bff', marginBottom: '15px' }}>What Happens After You Hit Login?</h3>
         <p style={{ fontSize: '1.1rem', lineHeight: '1.6', color: '#555' }}>
-          Once you hit the login button, your credentials (username and password) are sent to the server. 
+          Once you hit the login button, your credentials (email and password) are sent to the server. 
           If the login is successful, the server generates a **JWT (JSON Web Token)**, which is then returned to the client and saved in the browser’s **localStorage**.
         </p>
         <p style={{ fontSize: '1.1rem', lineHeight: '1.6', color: '#555' }}>
