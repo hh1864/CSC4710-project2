@@ -7,15 +7,10 @@ const NewQuote = () => {
     const [address, setAddress] = useState('');
     const [drivewaySize, setDrivewaySize] = useState('');
     const [price, setPrice] = useState('');
-    const [pictures, setPictures] = useState([]);
     const [note, setNote] = useState('');
     const [error, setError] = useState('');
     const [loading, setLoading] = useState(false);
     const navigate = useNavigate();
-
-    const handlePictures = (event) => {
-        setPictures([...event.target.files]);
-    };
 
     // Handle form 
     const handleSubmit = async (e) => {
@@ -27,12 +22,11 @@ const NewQuote = () => {
         formData.append('address', address);
         formData.append('drivewaysize', drivewaySize);
         formData.append('price', price);
-        pictures.forEach(picture => formData.append('pictures', picture));
         formData.append('note', note);
 
         try {
             // Send POST request to backend
-            const res = await axios.post('http://localhost:5000/newrequest', formData, {
+            const res = await axios.post('http://localhost:5000/newquote', formData, {
                 headers: {
                     'Content-Type': 'multipart/form-data',
                     Authorization: `Bearer ${localStorage.getItem('token')}`,
@@ -84,17 +78,6 @@ const NewQuote = () => {
                         step="0.01"
                         value={price}
                         onChange={e => setPrice(e.target.value)}
-                        required
-                        className="form-input"
-                    />
-                </div>
-                <div className="form-group">
-                    <label>Upload 5 Pictures:</label>
-                    <input
-                        type="file"
-                        multiple
-                        accept="image/*"
-                        onChange={handlePictures}
                         required
                         className="form-input"
                     />

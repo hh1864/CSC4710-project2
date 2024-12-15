@@ -5,6 +5,8 @@ const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
 const bodyParser = require('body-parser');
 const cors = require('cors');
+const multer = require('multer');
+const upload = multer();
 
 const app = express();
 
@@ -111,19 +113,25 @@ app.get('/profile', authenticateToken, (req, res) => {
    });
 });
 
+app.post('/newquote', upload.none(), async (req, res) => {
+  console.log(req.body);
+  const { address, drivewaysize, price, note } = req.body;
+  const clientId = req.client.clientid;
 
-app.get('/newquote', authenticateToken, (req, res) => {
-    const clientid = req.client.clientid;  // Extract userId from the decoded JWT token
+  if (!clientId) {
+    return res.status(400).json({ message: 'Client not authenticated' });
+  }
 
-    // Query the database to get the user data based on the userId
-    db.query('SELECT firstname, lastname, email FROM Clients WHERE clientid = ?', [clientid], (err, result) => {
-        if (err || result.length === 0) {
-            return res.status(404).json({ message: 'User not found' });  // Send error if user not found
-        }
-
-        // Send user profile data as response
-        res.json({ firstname: result[0].firstname, lastname: result[0].lastname, email: result[0].email });
-    });
+  db.query(
+    'INSERT INTO Quotes (id, address, drivewaysize, price, note, status) VALUES (?, ?, ?, ?, ?, ?)',
+    [clientId, address, drivewaysize, price, note, 'pending'], 
+    (err, result) => {
+      if (err) {
+        return res.status(500).json({ message: 'Quote creation failed', error: err });
+      }
+      res.status(201).json({ message: 'Quote created successfully' });
+    }
+  );
 });
 
 
