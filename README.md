@@ -21,7 +21,7 @@ password VARCHAR(255)
 
  
 
-CREATE TABLE Requests (  
+CREATE TABLE Quotes (  
 
 requestid INT PRIMARY KEY AUTO_INCREMENT, 
 
