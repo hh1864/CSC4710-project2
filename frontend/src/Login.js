@@ -1,6 +1,8 @@
 import React, { useState } from 'react';
 import axios from 'axios';
 import { Link, useNavigate } from 'react-router-dom';
+import { jwtDecode } from 'jwt-decode';
+
 
 const Login = () => {
   const [email, setEmail] = useState('');
@@ -11,16 +13,23 @@ const Login = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError('');
-
+  
     try {
       const res = await axios.post('http://localhost:5000/login', { email, password });
-      localStorage.setItem('token', res.data.token); // Save JWT token in localStorage
-      navigate('/dashboard'); // Redirect to dashboard after successful login
+      if (res.data.token) {
+        const user = jwtDecode(res.data.token);
+        console.log('Decoded token:', user); // Debugging
+        localStorage.setItem('token', res.data.token);
+        navigate(user.role === 'admin' ? '/admin-dashboard' : '/dashboard');
+      }
     } catch (err) {
-      setError('Login failed. Please try again.');
+      console.error('Login error:', err.response?.data || err.message);
+      setError(err.response?.data?.message || 'Login failed. Please try again.');
     }
   };
 
+
+  
   return (
     <div className="container" style={{ padding: '20px', maxWidth: '1200px', margin: '0 auto' }}>
       <h2 style={{ textAlign: 'center', fontSize: '2rem', color: '#007bff', marginBottom: '20px' }}>Login</h2>
@@ -29,8 +38,6 @@ const Login = () => {
       <nav style={{ textAlign: 'center', marginBottom: '20px' }}>
         <ul style={{ listStyleType: 'none', padding: '0', display: 'flex', justifyContent: 'center', gap: '20px' }}>
           <li><Link to="/" style={menuLinkStyle}>Home</Link></li>
-          <li><Link to="/dashboard" style={menuLinkStyle}>Dashboard</Link></li>
-          <li><Link to="/profile" style={menuLinkStyle}>Profile</Link></li>  {/* Replaced Login link with Profile */}
           <li><Link to="/register" style={menuLinkStyle}>Register</Link></li>
         </ul>
       </nav>
