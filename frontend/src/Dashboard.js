@@ -1,11 +1,16 @@
-// This is the code for Dashboard page
 import React, { useState } from 'react';
+import axios from 'axios';
 import { Link, useNavigate } from 'react-router-dom';
 
 const Dashboard = () => {
   const navigate = useNavigate();
-
-  // Fake data for testing purposes
+  const [formData, setFormData] = useState({
+    address: '',
+    squareFeet: '',
+    price: '',
+    note: '',
+  });
+  const [picture, setPicture] = useState(null);
   const [quotes, setQuotes] = useState([
     { id: 1, address: '123 Main St', status: 'pending', currentPrice: 1000 },
     { id: 2, address: '456 Oak Ave', status: 'agreed', currentPrice: 1200 },
@@ -21,6 +26,8 @@ const Dashboard = () => {
   const [negotiation, setNegotiation] = useState(null);
   const [dispute, setDispute] = useState(null);
   const [paymentConfirmation, setPaymentConfirmation] = useState(null);
+  const [message, setMessage] = useState('');
+  const [error, setError] = useState('');
 
   const handleLogout = () => {
     localStorage.removeItem('token');
@@ -39,25 +46,70 @@ const Dashboard = () => {
     setPaymentConfirmation(paymentConfirmation === id ? null : id);
   };
 
+  const handleChange = (e) => {
+    const { name, value } = e.target;
+    setFormData({ ...formData, [name]: value });
+  };
+
+  const handleFileChange = (e) => {
+    setPicture(e.target.files[0]);
+  };
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    setMessage('');
+    setError('');
+  
+    const token = localStorage.getItem('token');
+    if (!token) {
+      setError('You must be logged in to submit a quote.');
+      navigate('/login');
+      return;
+    }
+  
+    const formDataToSend = new FormData();
+    formDataToSend.append('address', formData.address);
+    formDataToSend.append('squareFeet', formData.squareFeet); // Updated to match backend
+    formDataToSend.append('proposedPrice', formData.price); // Updated to match backend
+    formDataToSend.append('notes', formData.note); // Updated to match backend
+    if (picture) {
+      formDataToSend.append('picture', picture);
+    }
+  
+    try {
+      const res = await axios.post('http://localhost:5000/submit-quote', formDataToSend, {
+        headers: {
+          Authorization: `Bearer ${token}`, // Include 'Bearer' prefix
+          'Content-Type': 'multipart/form-data',
+        },
+      });
+      setMessage(res.data.message);
+    } catch (err) {
+      setError(err.response?.data?.message || 'Failed to submit quote.');
+    }
+  };
+  
+  
+
   const sectionStyle = {
     marginBottom: '40px',
     padding: '20px',
     backgroundColor: '#f9f9f9',
     borderRadius: '8px',
-    boxShadow: '0 4px 6px rgba(0, 0, 0, 0.1)'
+    boxShadow: '0 4px 6px rgba(0, 0, 0, 0.1)',
   };
 
   const headingStyle = {
     fontSize: '1.5rem',
     color: '#007bff',
-    marginBottom: '10px'
+    marginBottom: '10px',
   };
 
   const buttonContainerStyle = {
     display: 'flex',
     justifyContent: 'flex-end',
     gap: '10px',
-    marginTop: '10px'
+    marginTop: '10px',
   };
 
   const buttonStyle = {
@@ -68,7 +120,7 @@ const Dashboard = () => {
     borderRadius: '4px',
     border: 'none',
     cursor: 'pointer',
-    width: 'auto'
+    width: 'auto',
   };
 
   return (
@@ -77,67 +129,80 @@ const Dashboard = () => {
 
       <nav style={{ textAlign: 'center', marginBottom: '30px' }}>
         <ul style={{ listStyleType: 'none', padding: '0', display: 'flex', justifyContent: 'center', gap: '40px', alignItems: 'center' }}>
-          <li><Link to="/" style={{ textDecoration: 'none', fontSize: '1.2rem', color: '#007bff', padding: '10px 20px', backgroundColor: '#f5f5f5', borderRadius: '4px', transition: 'background-color 0.3s', display: 'inline-block', textAlign: 'center' }}>Home</Link></li>
-          <li><Link to="/profile" style={{ textDecoration: 'none', fontSize: '1.2rem', color: '#007bff', padding: '10px 20px', backgroundColor: '#f5f5f5', borderRadius: '4px', transition: 'background-color 0.3s', display: 'inline-block', textAlign: 'center' }}>Profile</Link></li>
-          <li><button onClick={handleLogout} style={{ fontSize: '1.2rem', color: '#007bff', backgroundColor: '#f5f5f5', padding: '10px 20px', borderRadius: '4px', border: 'none', cursor: 'pointer', transition: 'background-color 0.3s', display: 'inline-block', textAlign: 'center' }}>Logout</button></li>
+          <li><Link to="/" style={{ textDecoration: 'none', fontSize: '1.2rem', color: '#007bff' }}>Home</Link></li>
+          <li><Link to="/profile" style={{ textDecoration: 'none', fontSize: '1.2rem', color: '#007bff' }}>Profile</Link></li>
+          <li>
+            <button
+              onClick={handleLogout}
+              style={{ textDecoration: 'none', fontSize: '1.2rem', color: '#007bff', border: 'none', cursor: 'pointer' }}
+            >
+              Logout
+            </button>
+          </li>
         </ul>
       </nav>
 
       <section style={sectionStyle}>
         <h3 style={headingStyle}>Submit New Quote</h3>
-        <form>
+        {message && <p style={{ color: 'green' }}>{message}</p>}
+        {error && <p style={{ color: 'red' }}>{error}</p>}
+        <form onSubmit={handleSubmit}>
           <div style={{ marginBottom: '15px' }}>
             <label>Address:</label>
-            <input type="text" name="address" required style={{ display: 'block', width: '100%', padding: '10px', marginBottom: '10px', border: '1px solid #ddd', borderRadius: '4px' }} />
+            <input
+              type="text"
+              name="address"
+              value={formData.address}
+              onChange={handleChange}
+              required
+              style={{ display: 'block', width: '100%', padding: '10px', marginBottom: '10px', border: '1px solid #ddd', borderRadius: '4px' }}
+            />
           </div>
           <div style={{ marginBottom: '15px' }}>
             <label>Square Feet:</label>
-            <input type="number" name="squareFeet" required style={{ display: 'block', width: '100%', padding: '10px', marginBottom: '10px', border: '1px solid #ddd', borderRadius: '4px' }} />
+            <input
+              type="number"
+              name="squareFeet"
+              value={formData.drivewaysize}
+              onChange={handleChange}
+              required
+              style={{ display: 'block', width: '100%', padding: '10px', marginBottom: '10px', border: '1px solid #ddd', borderRadius: '4px' }}
+            />
           </div>
           <div style={{ marginBottom: '15px' }}>
             <label>Proposed Price:</label>
-            <input type="text" name="price" required style={{ display: 'block', width: '100%', padding: '10px', marginBottom: '10px', border: '1px solid #ddd', borderRadius: '4px' }} />
+            <input
+              type="text"
+              name="price"
+              value={formData.price}
+              onChange={handleChange}
+              required
+              style={{ display: 'block', width: '100%', padding: '10px', marginBottom: '10px', border: '1px solid #ddd', borderRadius: '4px' }}
+            />
           </div>
           <div style={{ marginBottom: '15px' }}>
             <label>Notes:</label>
-            <textarea name="notes" style={{ display: 'block', width: '100%', padding: '10px', border: '1px solid #ddd', borderRadius: '4px' }}></textarea>
+            <textarea
+              name="note"
+              value={formData.note}
+              onChange={handleChange}
+              style={{ display: 'block', width: '100%', padding: '10px', border: '1px solid #ddd', borderRadius: '4px' }}
+            ></textarea>
           </div>
           <div style={{ marginBottom: '15px' }}>
-            <label>Upload Driveway Pictures:</label>
-            <input type="file" name="pictures" multiple accept="image/*" required style={{ display: 'block', marginBottom: '10px' }} />
+            <label>Upload Driveway Picture:</label>
+            <input
+              type="file"
+              name="picture"
+              onChange={handleFileChange}
+              accept="image/*"
+              style={{ display: 'block', marginBottom: '10px' }}
+            />
           </div>
           <button type="submit" style={buttonStyle}>Submit</button>
         </form>
       </section>
 
-      <section style={sectionStyle}>
-        <h3 style={headingStyle}>Quotes</h3>
-        <ul style={{ fontSize: '1.1rem', color: '#555' }}>
-          {quotes.length > 0 ? (
-            quotes.map(quote => (
-              <li key={quote.id} style={{ marginBottom: '20px' }}>
-                Address: {quote.address} | Status: {quote.status} | Current Price: ${quote.currentPrice}
-                <div style={buttonContainerStyle}>
-                  {quote.status === 'pending' && (
-                    <>
-                      <button onClick={() => handleNegotiationToggle(quote.id)} style={buttonStyle}>Negotiate</button>
-                      {negotiation === quote.id && (
-                        <div style={{ marginTop: '10px' }}>
-                          <input type="text" placeholder="Enter counter-offer" style={{ padding: '5px', marginRight: '10px', border: '1px solid #ddd', borderRadius: '4px' }} />
-                          <button style={buttonStyle}>Submit</button>
-                          <button onClick={() => handleNegotiationToggle(null)} style={{ ...buttonStyle, backgroundColor: '#dc3545' }}>Cancel</button>
-                        </div>
-                      )}
-                    </>
-                  )}
-                </div>
-              </li> //error here
-            ))
-          ) : (
-            <li style={{ color: '#555' }}>None</li>
-          )}
-        </ul>
-      </section>
 
       <section style={sectionStyle}>
         <h3 style={headingStyle}>Bills</h3>
