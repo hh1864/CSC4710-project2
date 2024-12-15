@@ -1,48 +1,44 @@
-// Author: Anik Tahabilder
-import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';  // Importing routing components from react-router-dom
-import HomePage from './HomePage';  // Importing the HomePage component
-import Login from './Login';  // Importing the Login component
-import Register from './Register';  // Importing the Register component
-import Dashboard from './Dashboard';  // Importing the Dashboard component
-import Profile from './Profile';  // Importing the Profile component
-import PrivateRoute from './PrivateRoute';  // Importing the PrivateRoute component for protected routes
+import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';  
+import HomePage from './HomePage';  
+import Login from './Login';  
+import Register from './Register';  
+import Dashboard from './Dashboard';  
+import AdminDashboard from './AdminDashboard';  // Import AdminDashboard
+import Profile from './Profile';  
+import PrivateRoute from './PrivateRoute';  
 
 function App() {
   return (
-    <Router>  {/* BrowserRouter provides the routing context to the application */}
-      <Routes>  {/* Defines the routing paths for the application */}
-        
-        {/* Public routes */}
-        {/* Route for HomePage (accessible to everyone) */}
+    <Router>  
+      <Routes>  
         <Route path="/" element={<HomePage />} />
-        
-        {/* Route for Login (accessible to everyone) */}
         <Route path="/login" element={<Login />} />
-        
-        {/* Route for Register (accessible to everyone) */}
         <Route path="/register" element={<Register />} />
-
-        {/* Private routes */}
-        {/* Dashboard route, protected by PrivateRoute (only accessible if authenticated) */}
+        
         <Route
           path="/dashboard"
           element={
             <PrivateRoute>
-              <Dashboard />  {/* Renders Dashboard if user is authenticated */}
+              <Dashboard />  
             </PrivateRoute>
           }
         />
-
-        {/* Profile route, protected by PrivateRoute (only accessible if authenticated) */}
+        <Route
+          path="/admin-dashboard"
+          element={
+            <PrivateRoute>
+              <AdminDashboard />  {/* Route for Admin Dashboard */}
+            </PrivateRoute>
+          }
+        />
         <Route
           path="/profile"
           element={
             <PrivateRoute>
-              <Profile />  {/* Renders Profile if user is authenticated */}
+              <Profile />  
             </PrivateRoute>
           }
         />
-        
       </Routes>
     </Router>
   );
