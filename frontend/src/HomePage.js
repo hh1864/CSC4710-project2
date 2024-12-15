@@ -13,7 +13,7 @@ const HomePage = () => {
           <ul style={{ listStyleType: 'none', padding: '0', display: 'flex', justifyContent: 'center', gap: '20px' }}>
             <li><Link to="/login" style={{ textDecoration: 'none', fontSize: '1.2rem', color: '#007bff' }}>Login</Link></li>
             <li><Link to="/register" style={{ textDecoration: 'none', fontSize: '1.2rem', color: '#007bff' }}>Register</Link></li>
-            {token && <li><Link to="/dashboard" style={{ textDecoration: 'none', fontSize: '1.2rem', color: '#007bff' }}>Dashboard</Link></li>}
+            
           </ul>
         </nav>
       </header>
