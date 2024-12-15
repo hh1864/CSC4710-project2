@@ -1,191 +1,57 @@
 // This is the code for Dashboard page
-import React, { useState } from 'react';
+import React from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 
 const Dashboard = () => {
   const navigate = useNavigate();
 
-  // Fake data for testing purposes
-  const [quotes, setQuotes] = useState([
-    { id: 1, address: '123 Main St', status: 'pending', currentPrice: 1000 },
-    { id: 2, address: '456 Oak Ave', status: 'agreed', currentPrice: 1200 },
-  ]);
-  const [orders, setOrders] = useState([
-    { id: 1, status: 'completed', agreedPrice: 1500.0 },
-  ]);
-  const [bills, setBills] = useState([
-    { id: 1, amount: 1500.0, status: 'pending', notes: '' },
-    { id: 2, amount: 2000.0, status: 'agreed', notes: '' },
-  ]);
-
-  const [negotiation, setNegotiation] = useState(null);
-  const [dispute, setDispute] = useState(null);
-  const [paymentConfirmation, setPaymentConfirmation] = useState(null);
-
+  // Log out function to clear the token and redirect to login page
   const handleLogout = () => {
-    localStorage.removeItem('token');
-    navigate('/login');
-  };
-
-  const handleNegotiationToggle = (id) => {
-    setNegotiation(negotiation === id ? null : id);
-  };
-
-  const handleDisputeToggle = (id) => {
-    setDispute(dispute === id ? null : id);
-  };
-
-  const handlePaymentToggle = (id) => {
-    setPaymentConfirmation(paymentConfirmation === id ? null : id);
-  };
-
-  const sectionStyle = {
-    marginBottom: '40px',
-    padding: '20px',
-    backgroundColor: '#f9f9f9',
-    borderRadius: '8px',
-    boxShadow: '0 4px 6px rgba(0, 0, 0, 0.1)'
-  };
-
-  const headingStyle = {
-    fontSize: '1.5rem',
-    color: '#007bff',
-    marginBottom: '10px'
-  };
-
-  const buttonContainerStyle = {
-    display: 'flex',
-    justifyContent: 'flex-end',
-    gap: '10px',
-    marginTop: '10px'
-  };
-
-  const buttonStyle = {
-    fontSize: '1.2rem',
-    color: '#fff',
-    backgroundColor: '#007bff',
-    padding: '10px 20px',
-    borderRadius: '4px',
-    border: 'none',
-    cursor: 'pointer',
-    width: 'auto'
+    localStorage.removeItem('token'); // Remove the JWT token
+    navigate('/login'); // Redirect to login page
   };
 
   return (
-    <div className="container" style={{ padding: '20px', maxWidth: '1200px', margin: '0 auto', fontFamily: 'Arial, sans-serif', lineHeight: '1.6' }}>
-      <h2 style={{ fontSize: '2rem', color: '#007bff', textAlign: 'center', marginBottom: '30px' }}>User Dashboard</h2>
-
-      <nav style={{ textAlign: 'center', marginBottom: '30px' }}>
+    <div className="container" style={{ padding: '20px', maxWidth: '1200px', margin: '0 auto' }}>
+      <h2 style={{ fontSize: '2rem', color: '#007bff', textAlign: 'center', marginBottom: '20px' }}>Dashboard</h2>
+      
+      {/* Menu - Home, Profile, Logout */}
+      <nav style={{ textAlign: 'center', marginBottom: '20px' }}>
         <ul style={{ listStyleType: 'none', padding: '0', display: 'flex', justifyContent: 'center', gap: '40px', alignItems: 'center' }}>
-          <li><Link to="/" style={{ textDecoration: 'none', fontSize: '1.2rem', color: '#007bff', padding: '10px 20px', backgroundColor: '#f5f5f5', borderRadius: '4px', transition: 'background-color 0.3s', display: 'inline-block', textAlign: 'center' }}>Home</Link></li>
-          <li><Link to="/profile" style={{ textDecoration: 'none', fontSize: '1.2rem', color: '#007bff', padding: '10px 20px', backgroundColor: '#f5f5f5', borderRadius: '4px', transition: 'background-color 0.3s', display: 'inline-block', textAlign: 'center' }}>Profile</Link></li>
-          <li><button onClick={handleLogout} style={{ fontSize: '1.2rem', color: '#007bff', backgroundColor: '#f5f5f5', padding: '10px 20px', borderRadius: '4px', border: 'none', cursor: 'pointer', transition: 'background-color 0.3s', display: 'inline-block', textAlign: 'center' }}>Logout</button></li>
+          <li>
+            <Link to="/" style={{ textDecoration: 'none', fontSize: '1.2rem', color: '#007bff', padding: '10px 20px', backgroundColor: '#f5f5f5', borderRadius: '4px' }}>
+              Home
+            </Link>
+          </li>
+          <li>
+            <Link to="/profile" style={{ textDecoration: 'none', fontSize: '1.2rem', color: '#007bff', padding: '10px 20px', backgroundColor: '#f5f5f5', borderRadius: '4px' }}>
+              Profile
+            </Link>
+          </li>
+          <li>
+            <Link to="/newquote" style={{ textDecoration: 'none', fontSize: '1.2rem', color: '#007bff', padding: '10px 20px', backgroundColor: '#f5f5f5', borderRadius: '4px' }}>
+                New Quote
+            </Link>
+          </li>
+          <li>
+            <button
+              onClick={handleLogout}
+              style={{
+                fontSize: '1.2rem',
+                color: '#007bff',
+                backgroundColor: '#f5f5f5',
+                padding: '10px 20px',
+                borderRadius: '4px',
+                border: 'none',
+                cursor: 'pointer',
+                textDecoration: 'none'
+              }}
+            >
+              Logout
+            </button>
+          </li>
         </ul>
       </nav>
-
-      <section style={sectionStyle}>
-        <h3 style={headingStyle}>Submit New Quote</h3>
-        <form>
-          <div style={{ marginBottom: '15px' }}>
-            <label>Address:</label>
-            <input type="text" name="address" required style={{ display: 'block', width: '100%', padding: '10px', marginBottom: '10px', border: '1px solid #ddd', borderRadius: '4px' }} />
-          </div>
-          <div style={{ marginBottom: '15px' }}>
-            <label>Square Feet:</label>
-            <input type="number" name="squareFeet" required style={{ display: 'block', width: '100%', padding: '10px', marginBottom: '10px', border: '1px solid #ddd', borderRadius: '4px' }} />
-          </div>
-          <div style={{ marginBottom: '15px' }}>
-            <label>Proposed Price:</label>
-            <input type="text" name="price" required style={{ display: 'block', width: '100%', padding: '10px', marginBottom: '10px', border: '1px solid #ddd', borderRadius: '4px' }} />
-          </div>
-          <div style={{ marginBottom: '15px' }}>
-            <label>Notes:</label>
-            <textarea name="notes" style={{ display: 'block', width: '100%', padding: '10px', border: '1px solid #ddd', borderRadius: '4px' }}></textarea>
-          </div>
-          <div style={{ marginBottom: '15px' }}>
-            <label>Upload Driveway Pictures:</label>
-            <input type="file" name="pictures" multiple accept="image/*" required style={{ display: 'block', marginBottom: '10px' }} />
-          </div>
-          <button type="submit" style={buttonStyle}>Submit</button>
-        </form>
-      </section>
-
-      <section style={sectionStyle}>
-        <h3 style={headingStyle}>Quotes</h3>
-        <ul style={{ fontSize: '1.1rem', color: '#555' }}>
-          {quotes.length > 0 ? (
-            quotes.map(quote => (
-              <li key={quote.id} style={{ marginBottom: '20px' }}>
-                Address: {quote.address} | Status: {quote.status} | Current Price: ${quote.currentPrice}
-                <div style={buttonContainerStyle}>
-                  {quote.status === 'pending' && (
-                    <>
-                      <button onClick={() => handleNegotiationToggle(quote.id)} style={buttonStyle}>Negotiate</button>
-                      {negotiation === quote.id && (
-                        <div style={{ marginTop: '10px' }}>
-                          <input type="text" placeholder="Enter counter-offer" style={{ padding: '5px', marginRight: '10px', border: '1px solid #ddd', borderRadius: '4px' }} />
-                          <button style={buttonStyle}>Submit</button>
-                          <button onClick={() => handleNegotiationToggle(null)} style={{ ...buttonStyle, backgroundColor: '#dc3545' }}>Cancel</button>
-                        </div>
-                      )}
-                    </>
-                  )}
-                </div>
-              </li> //error here
-            ))
-          ) : (
-            <li style={{ color: '#555' }}>None</li>
-          )}
-        </ul>
-      </section>
-
-      <section style={sectionStyle}>
-        <h3 style={headingStyle}>Bills</h3>
-        <ul style={{ fontSize: '1.1rem', color: '#555' }}>
-          {bills.length > 0 ? (
-            bills.map(bill => (
-              <li key={bill.id}>
-                Bill ID: {bill.id} | Amount: ${bill.amount} | Status: {bill.status}
-                <div style={buttonContainerStyle}>
-                  <button onClick={() => handlePaymentToggle(bill.id)} style={buttonStyle}>Pay</button>
-                  <button onClick={() => handleDisputeToggle(bill.id)} style={{ ...buttonStyle, backgroundColor: '#dc3545' }}>Dispute</button>
-                </div>
-                {paymentConfirmation === bill.id && (
-                  <div style={{ marginTop: '10px' }}>
-                    <p>Confirm payment?</p>
-                    <button style={buttonStyle}>Yes</button>
-                    <button onClick={() => handlePaymentToggle(null)} style={{ ...buttonStyle, backgroundColor: '#dc3545' }}>Cancel</button>
-                  </div>
-                )}
-                {dispute === bill.id && (
-                  <div style={{ marginTop: '10px' }}>
-                    <textarea placeholder="Enter dispute notes" style={{ padding: '5px', width: '100%', marginBottom: '10px', border: '1px solid #ddd', borderRadius: '4px' }}></textarea>
-                    <button style={buttonStyle}>Submit</button>
-                    <button onClick={() => handleDisputeToggle(null)} style={{ ...buttonStyle, backgroundColor: '#dc3545' }}>Cancel</button>
-                  </div>
-                )}
-              </li>
-            ))
-          ) : (
-            <li style={{ color: '#555' }}>None</li>
-          )}
-        </ul>
-      </section>
-
-      <section style={sectionStyle}>
-        <h3 style={headingStyle}>Orders</h3>
-        <ul style={{ fontSize: '1.1rem', color: '#555' }}>
-          {orders.length > 0 ? (
-            orders.map(order => (
-              <li key={order.id}>
-                Order ID: {order.id} | Status: {order.status} | Agreed Price: ${order.agreedPrice}
-              </li>
-            ))
-          ) : (
-            <li style={{ color: '#555' }}>None</li>
-          )}
-        </ul>
-      </section>
     </div>
   );
 };

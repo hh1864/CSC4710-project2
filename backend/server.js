@@ -5,8 +5,6 @@ const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
 const bodyParser = require('body-parser');
 const cors = require('cors');
-const multer = require('multer');
-const upload = multer({ dest: 'pictures/' }); 
 
 const app = express();
 
@@ -19,7 +17,7 @@ const db = mysql.createConnection({
   host: 'localhost',  // Database host, usually 'localhost' in local development
   user: 'root',       // Default username in XAMPP
   password: '',       // Leave blank if no password is set in XAMPP
-  database: 'project2',  // Database name
+  database: 'jwt_auth_db',  // Database name
 });
 
 // Connect to the MySQL database
@@ -113,23 +111,19 @@ app.get('/profile', authenticateToken, (req, res) => {
    });
 });
 
-// Route to create a new request
-app.post('/newrequest', authenticateToken, upload.array('pictures'), (req, res) => {
-  const { address, drivewaysize, price, note } = req.body;
-  const clientid = req.client.clientid;
-  const pictures = req.files || [];
-  const picturePaths = pictures.map(file => file.path).join(',');
 
-  const query = 'INSERT INTO Requests (clientid, address, drivewaysize, price, note, pictures, status) VALUES (?, ?, ?, ?, ?, ?, ?)';
-  const values = [clientid, address, drivewaysize, price, note, picturePaths];
+app.get('/newquote', authenticateToken, (req, res) => {
+    const clientid = req.client.clientid;  // Extract userId from the decoded JWT token
 
-  db.query(query, values, (err, result) => {
-    if (err) {
-        console.error('Database error:', err.message);
-        return res.status(500).json({ message: 'Failed to submit request.', error: err.message });
-    }
-    res.status(201).json({ message: 'request submitted!' });
-  });
+    // Query the database to get the user data based on the userId
+    db.query('SELECT firstname, lastname, email FROM Clients WHERE clientid = ?', [clientid], (err, result) => {
+        if (err || result.length === 0) {
+            return res.status(404).json({ message: 'User not found' });  // Send error if user not found
+        }
+
+        // Send user profile data as response
+        res.json({ firstname: result[0].firstname, lastname: result[0].lastname, email: result[0].email });
+    });
 });
 
 

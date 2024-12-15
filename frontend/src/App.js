@@ -5,6 +5,7 @@ import Login from './Login';  // Importing the Login component
 import Register from './Register';  // Importing the Register component
 import Dashboard from './Dashboard';  // Importing the Dashboard component
 import Profile from './Profile';  // Importing the Profile component
+import NewQuote from './NewQuote';
 import PrivateRoute from './PrivateRoute';  // Importing the PrivateRoute component for protected routes
 
 function App() {
@@ -21,6 +22,7 @@ function App() {
         
         {/* Route for Register (accessible to everyone) */}
         <Route path="/register" element={<Register />} />
+
 
         {/* Private routes */}
         {/* Dashboard route, protected by PrivateRoute (only accessible if authenticated) */}
@@ -39,6 +41,14 @@ function App() {
           element={
             <PrivateRoute>
               <Profile />  {/* Renders Profile if user is authenticated */}
+            </PrivateRoute>
+          }
+        />
+        <Route
+          path="/newquote"
+          element={
+            <PrivateRoute>
+              <NewQuote /> 
             </PrivateRoute>
           }
         />
