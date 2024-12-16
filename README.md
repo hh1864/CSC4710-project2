@@ -2,7 +2,7 @@
 
 
 -- Create the database
-CREATE DATABASE project 2;
+CREATE DATABASE project2;
 
 CREATE TABLE Clients (   
 
@@ -26,7 +26,7 @@ CREATE TABLE Clients (
 
   
 
-CREATE TABLE Quotes(   
+CREATE TABLE Requests(   
 
   requestid INT PRIMARY KEY AUTO_INCREMENT,  
 
@@ -64,7 +64,7 @@ CREATE TABLE Responses (
 
   status ENUM('pending', 'negotiating', 'agreed', 'denied') NOT NULL,  
 
-  FOREIGN KEY (requestid) REFERENCES Quotes(requestid) 
+  FOREIGN KEY (requestid) REFERENCES Requests(requestid) 
 
 );  
 
@@ -116,6 +116,6 @@ CREATE TABLE Pictures (
 
   picurl VARCHAR(255),  
 
-  FOREIGN KEY (requestid) REFERENCES Quotes(requestid)   
+  FOREIGN KEY (requestid) REFERENCES Requests(requestid)   
 
 ); 
