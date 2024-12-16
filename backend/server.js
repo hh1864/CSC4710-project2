@@ -5,22 +5,23 @@ const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
 const bodyParser = require('body-parser');
 const cors = require('cors');
+const multer = require('multer');
 
 const app = express();
 
-// Middleware to parse JSON data and handle CORS (Cross-Origin Resource Sharing)
+// Middleware
 app.use(bodyParser.json());
-app.use(cors());
+app.use(cors()); // Allow requests from different origins
+const upload = multer({ dest: 'pictures/' }); 
 
-// Create a MySQL connection
+// MySQL connection
 const db = mysql.createConnection({
-  host: 'localhost',  // Database host, usually 'localhost' in local development
-  user: 'root',       // Default username in XAMPP
-  password: '',       // Leave blank if no password is set in XAMPP
-  database: 'jwt_auth_db',  // Database name
+  host: 'localhost',
+  user: 'root',
+  password: '',
+  database: 'project2',
 });
 
-// Connect to the MySQL database
 db.connect(err => {
   if (err) {
     console.error('Database connection failed:', err.stack);
@@ -29,84 +30,118 @@ db.connect(err => {
   console.log('Connected to MySQL database.');
 });
 
-// Start the server and listen on port 5000
-app.listen(5000, () => {
-  console.log('Server is running on port 5000');
+// JWT Secret
+const JWT_SECRET = 'your_jwt_secret';
+
+const PORT = 5000;
+app.listen(PORT, () => {
+  console.log(`Backend server is running on port ${PORT}`);
+}).on('error', (err) => {
+  if (err.code === 'EADDRINUSE') {
+    console.error(`Port ${PORT} is already in use.`);
+  } else {
+    console.error('Server error:', err);
+  }
 });
 
-// User registration route
+// Register
 app.post('/register', async (req, res) => {
-  const { username, email, password } = req.body;  // Extract username, email, and password from request body
-  const hashedPassword = await bcrypt.hash(password, 10);  // Hash the password using bcrypt with 10 salt rounds
-
-  // Insert the new user into the 'users' table
-  db.query(
-    'INSERT INTO users (username, email, password) VALUES (?, ?, ?)',
-    [username, email, hashedPassword],
-    (err, result) => {
+  const { firstname, lastname, address, creditcard, phonenumber, email, password, role } = req.body;
+  if (!firstname || !lastname || !address || !creditcard || !phonenumber || !email || !password) {
+    return res.status(400).json({ message: 'All fields are required.' });
+  }
+  try {
+    const hashedPassword = await bcrypt.hash(password, 10);
+    const query = `INSERT INTO Clients (firstname, lastname, address, creditcard, phonenumber, email, password, role) VALUES (?, ?, ?, ?, ?, ?, ?, ?)`;
+    const values = [firstname, lastname, address, creditcard, phonenumber, email, hashedPassword, role || 'client'];
+    db.query(query, values, (err) => {
       if (err) {
-        return res.status(500).json({ message: 'User registration failed', error: err });  // Send error response if registration fails
+        if (err.code === 'ER_DUP_ENTRY') {
+          return res.status(400).json({ message: 'Email is already registered.' });
+        }
+        return res.status(500).json({ message: 'Failed to register user.' });
       }
-      res.status(201).json({ message: 'User registered successfully' });  // Send success response
-    }
-  );
+      res.status(201).json({ message: 'User registered successfully.' });
+    });
+  } catch (err) {
+    res.status(500).json({ message: 'Server error. Please try again later.' });
+  }
 });
 
-// User login route
+// Login
 app.post('/login', (req, res) => {
-  const { username, password } = req.body;  // Extract username and password from request body
-
-  // Query the database for the user with the provided username
-  db.query('SELECT * FROM users WHERE username = ?', [username], async (err, results) => {
+  const { email, password } = req.body;
+  db.query('SELECT * FROM Clients WHERE email = ?', [email], async (err, results) => {
     if (err || results.length === 0) {
-      return res.status(400).json({ message: 'User not found' });  // Send error response if user is not found
+      return res.status(400).json({ message: 'Invalid email or password.' });
     }
-
-    const user = results[0];  // Get the user record from the query result
-    const passwordMatch = await bcrypt.compare(password, user.password);  // Compare the provided password with the hashed password
-
+    const client = results[0];
+    const passwordMatch = await bcrypt.compare(password, client.password);
     if (!passwordMatch) {
-      return res.status(401).json({ message: 'Invalid credentials' });  // Send error response if the password does not match
+      return res.status(401).json({ message: 'Invalid credentials.' });
     }
-
-    // Generate a JWT token with the user ID and a secret key, valid for 3 hour
-    const token = jwt.sign({ userId: user.id }, 'your_jwt_secret', { expiresIn: '3h' });
-
-    // Send the JWT token as the response
+    const token = jwt.sign({ clientid: client.clientid, role: client.role }, JWT_SECRET, { expiresIn: '3h' });
     res.json({ token });
   });
 });
 
-// Middleware function to authenticate JWT tokens
+// Middleware for JWT Authentication
 const authenticateToken = (req, res, next) => {
-  const token = req.headers['authorization'];  // Get the token from the 'Authorization' header
-
-  if (!token) return res.status(401).json({ message: 'Access denied' });  // If no token is provided, deny access
-
-  // Verify the JWT token
-  jwt.verify(token, 'your_jwt_secret', (err, user) => {
-    if (err) return res.status(403).json({ message: 'Invalid token' });  // If the token is invalid, send a 403 error
-    req.user = user;  // Store the decoded user data in the request object
-    next();  // Proceed to the next middleware/route handler
+  const authHeader = req.headers['authorization'];
+  const token = authHeader && authHeader.split(' ')[1];
+  if (!token) return res.status(401).json({ message: 'Access denied.' });
+  jwt.verify(token, JWT_SECRET, (err, decoded) => {
+    if (err) return res.status(403).json({ message: 'Invalid token.' });
+    req.client = decoded;
+    next();
   });
+
+  console.log('Authorization header:', req.headers['authorization']);
+  console.log('Decoded JWT:', req.client);
+
 };
 
-// Protected route that requires JWT authentication
-app.get('/dashboard', authenticateToken, (req, res) => {
-  res.json({ message: 'Welcome to the dashboard. You are authenticated!' });  // Send a success message if authentication is valid
-});
 
 
-app.get('/profile', authenticateToken, (req, res) => {
-  const userId = req.user.userId;  // Extract userId from the decoded JWT token
+app.post('/submit-quote', authenticateToken, upload.single('picture'), (req, res) => {
+  console.log('Received body:', req.body);
+  console.log('Received file:', req.file);
 
-  // Query the database to get the user data based on the userId
-  db.query('SELECT username, email FROM users WHERE id = ?', [userId], (err, result) => {
-    if (err || result.length === 0) {
-      return res.status(404).json({ message: 'User not found' });  // Send error if user not found
+  const { address, drivewaysize, price, note } = req.body;
+  const clientid = req.client.clientid; // Extract client ID from JWT token
+
+  if (!address || !drivewaysize || !price) {
+    console.warn('Missing fields:', { address, drivewaysize, price });
+    return res.status(400).json({ message: 'All fields are required.' });
+  }
+
+  const query = `
+    INSERT INTO Requests (clientid, address, drivewaysize, price, note, status)
+    VALUES (?, ?, ?, ?, ?, 'pending')
+  `;
+  const values = [clientid, address, drivewaysize, price, note];
+
+  db.query(query, values, (err) => {
+    if (err) {
+      console.error('Database error:', err.message);
+      return res.status(500).json({ message: 'Failed to submit request.' });
     }
-
-    // Send user profile data as response
-    res.json({ username: result[0].username, email: result[0].email });
+    res.status(201).json({ message: 'Request submitted successfully.' });
   });
 });
+
+app.get('/requests', authenticateToken, (req, res) => {
+  const clientid = req.client.clientid;
+
+  const query = `
+    SELECT * FROM Requests WHERE clientid = ?
+  `;
+  db.query(query, [clientid], (err, results) => {
+    if (err) {
+      console.error('Database error:', err.message);
+      return res.status(500).json({ message: 'Failed to retrieve requests.' });
+    }
+    res.status(200).json(results);
+  });
+});
+
