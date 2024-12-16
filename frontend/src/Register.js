@@ -25,6 +25,7 @@ const Register = () => {
 
     console.log('Submitting form data:', formData); // Debugging
 
+    
 
     try {
       const res = await axios.post('http://localhost:5000/register', formData);
