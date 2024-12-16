@@ -112,7 +112,7 @@ app.post('/submit-quote', authenticateToken, upload.single('picture'), (req, res
   const picturePath = req.file ? req.file.path : null;
 
   const query = `
-    INSERT INTO Quotes (clientid, address, drivewaysize, price, note, status)
+    INSERT INTO Requests (clientid, address, drivewaysize, price, note, status)
     VALUES (?, ?, ?, ?, ?, ?, 'pending')
   `;
   const values = [clientid, address, drivewaysize, price, note];
