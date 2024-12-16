@@ -101,21 +101,21 @@ const authenticateToken = (req, res, next) => {
 app.post('/submit-quote', authenticateToken, upload.single('picture'), (req, res) => {
   console.log('Received body:', req.body);
   console.log('Received file:', req.file);
-  const { address, squareFeet, proposedPrice, notes } = req.body;
+  const { address, drivewaysize, price, note } = req.body;
   const clientid = req.client.clientid; // Extract client ID from JWT token
 
-  if (!address || !squareFeet || !proposedPrice) {
-    console.warn('Missing fields:', { address, squareFeet, proposedPrice });
+  if (!address || !drivewaysize || !price) {
+    console.warn('Missing fields:', { address, drivewaysize, price });
     return res.status(400).json({ message: 'All fields are required.' });
   }
 
   const picturePath = req.file ? req.file.path : null;
 
   const query = `
-    INSERT INTO Quotes (clientid, address, squareFeet, proposedPrice, notes, picturePath, status)
+    INSERT INTO Quotes (clientid, address, drivewaysize, price, note, status)
     VALUES (?, ?, ?, ?, ?, ?, 'pending')
   `;
-  const values = [clientid, address, squareFeet, proposedPrice, notes, picturePath];
+  const values = [clientid, address, drivewaysize, price, note];
 
   db.query(query, values, (err) => {
     if (err) {

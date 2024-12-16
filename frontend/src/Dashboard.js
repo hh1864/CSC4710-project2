@@ -6,7 +6,7 @@ const Dashboard = () => {
   const navigate = useNavigate();
   const [formData, setFormData] = useState({
     address: '',
-    squareFeet: '',
+    drivewaysize: '',
     price: '',
     note: '',
   });
@@ -69,8 +69,8 @@ const Dashboard = () => {
   
     const formDataToSend = new FormData();
     formDataToSend.append('address', formData.address);
-    formDataToSend.append('squareFeet', formData.squareFeet); // Updated to match backend
-    formDataToSend.append('proposedPrice', formData.price); // Updated to match backend
+    formDataToSend.append('drivewaysize', formData.drivewaysize); // Updated to match backend
+    formDataToSend.append('price', formData.price); // Updated to match backend
     formDataToSend.append('notes', formData.note); // Updated to match backend
     if (picture) {
       formDataToSend.append('picture', picture);
@@ -162,7 +162,7 @@ const Dashboard = () => {
             <label>Square Feet:</label>
             <input
               type="number"
-              name="squareFeet"
+              name="drivewaysize"
               value={formData.drivewaysize}
               onChange={handleChange}
               required
