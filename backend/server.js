@@ -87,20 +87,26 @@ app.post('/login', (req, res) => {
 
 // Middleware for JWT Authentication
 const authenticateToken = (req, res, next) => {
-  const token = req.headers['authorization'];
+  const authHeader = req.headers['authorization'];
+  const token = authHeader && authHeader.split(' ')[1];
   if (!token) return res.status(401).json({ message: 'Access denied.' });
   jwt.verify(token, JWT_SECRET, (err, decoded) => {
     if (err) return res.status(403).json({ message: 'Invalid token.' });
     req.client = decoded;
     next();
   });
+
+  console.log('Authorization header:', req.headers['authorization']);
+  console.log('Decoded JWT:', req.client);
+
 };
 
 
-// Endpoint to submit a new quote
+
 app.post('/submit-quote', authenticateToken, upload.single('picture'), (req, res) => {
   console.log('Received body:', req.body);
   console.log('Received file:', req.file);
+
   const { address, drivewaysize, price, note } = req.body;
   const clientid = req.client.clientid; // Extract client ID from JWT token
 
@@ -109,19 +115,33 @@ app.post('/submit-quote', authenticateToken, upload.single('picture'), (req, res
     return res.status(400).json({ message: 'All fields are required.' });
   }
 
-  const picturePath = req.file ? req.file.path : null;
-
   const query = `
     INSERT INTO Requests (clientid, address, drivewaysize, price, note, status)
-    VALUES (?, ?, ?, ?, ?, ?, 'pending')
+    VALUES (?, ?, ?, ?, ?, 'pending')
   `;
   const values = [clientid, address, drivewaysize, price, note];
 
   db.query(query, values, (err) => {
     if (err) {
       console.error('Database error:', err.message);
-      return res.status(500).json({ message: 'Failed to submit quote.' });
+      return res.status(500).json({ message: 'Failed to submit request.' });
     }
-    res.status(201).json({ message: 'Quote submitted successfully.' });
+    res.status(201).json({ message: 'Request submitted successfully.' });
   });
 });
+
+app.get('/requests', authenticateToken, (req, res) => {
+  const clientid = req.client.clientid;
+
+  const query = `
+    SELECT * FROM Requests WHERE clientid = ?
+  `;
+  db.query(query, [clientid], (err, results) => {
+    if (err) {
+      console.error('Database error:', err.message);
+      return res.status(500).json({ message: 'Failed to retrieve requests.' });
+    }
+    res.status(200).json(results);
+  });
+});
+
