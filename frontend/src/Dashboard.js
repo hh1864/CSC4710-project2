@@ -6,7 +6,7 @@ const Dashboard = () => {
   const navigate = useNavigate();
   const [formData, setFormData] = useState({
     address: '',
-    drivewaysize: '',
+    squareFeet: '',
     price: '',
     note: '',
   });
@@ -55,39 +55,37 @@ const Dashboard = () => {
     setPicture(e.target.files[0]);
   };
 
-  const handleSubmit = async (e) => {
+   const handleSubmit = async (e) => {
     e.preventDefault();
     setMessage('');
     setError('');
   
     const token = localStorage.getItem('token');
     if (!token) {
-      setError('You must be logged in to submit a quote.');
+      setError('You must be logged in to submit a request.');
       navigate('/login');
       return;
     }
   
-    const formDataToSend = new FormData();
-    formDataToSend.append('address', formData.address);
-    formDataToSend.append('drivewaysize', formData.drivewaysize); // Updated to match backend
-    formDataToSend.append('price', formData.price); // Updated to match backend
-    formDataToSend.append('notes', formData.note); // Updated to match backend
-    if (picture) {
-      formDataToSend.append('picture', picture);
-    }
+    const formDataToSend = {
+      address: formData.address,
+      drivewaysize: formData.squareFeet, // Match backend field names
+      price: formData.price,
+      note: formData.note,
+    };
   
     try {
       const res = await axios.post('http://localhost:5000/submit-quote', formDataToSend, {
         headers: {
-          Authorization: `Bearer ${token}`, // Include 'Bearer' prefix
-          'Content-Type': 'multipart/form-data',
+          Authorization: `Bearer ${token}`,
         },
       });
       setMessage(res.data.message);
     } catch (err) {
-      setError(err.response?.data?.message || 'Failed to submit quote.');
+      setError(err.response?.data?.message || 'Failed to submit request.');
     }
   };
+  
   
   
 
@@ -162,7 +160,7 @@ const Dashboard = () => {
             <label>Square Feet:</label>
             <input
               type="number"
-              name="drivewaysize"
+              name="squareFeet"
               value={formData.drivewaysize}
               onChange={handleChange}
               required
